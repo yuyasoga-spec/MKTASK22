@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>わくわく動物の森 マーケ案件管理 🐾</title>
+
+<script>
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDID9VLnYZwYaJ2wrQBYIj29gcMmyG6yuc",
+    authDomain: "task-abef2.firebaseapp.com",
+    databaseURL: "https://task-abef2-default-rtdb.firebaseio.com",
+    projectId: "task-abef2",
+    storageBucket: "task-abef2.firebasestorage.app",
+    messagingSenderId: "364908646523",
+    appId: "1:364908646523:web:809256785c2387e65952de"
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg:        #f4f0e6; 
+  --surface:   #ffffff;
+  --surface2:  #ede6da;
+  --surface3:  #faf8f5;
+  --border:    rgba(160,140,110,0.2);
+  --border2:   rgba(120,100,80,0.4);
+  --text:      #423830; 
+  --text2:     #736457;
+  --text3:     #ab9a8c;
+  
+  --blue:      #7db4e3;
+  --blue-bg:   #eef5fc;
+  --blue-tx:   #3b6b94;
+  --amber-bg:  #fdf3df;
+  --amber-tx:  #946c23;
+  --green-bg:  #e6f4de;
+  --green-tx:  #4d7a34;
+  --red-bg:    #fbe5e5;
+  --red-tx:    #a64444;
+  --gray-bg:   #ededeb;
+  --gray-tx:   #6e6e6b;
+  
+  --radius:    18px; 
+  --radius-lg: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #1e1c1a;
+    --surface:  #292522;
+    --surface2: #36302b;
+    --surface3: #24211e;
+    --border:   rgba(255,255,255,.07);
+    --border2:  rgba(255,255,255,.15);
+    --text:     #f2eae1;
+    --text2:    #bfa897;
+    --text3:    #7a6b5f;
+    --blue-bg:  #182d3d;
+    --blue-tx:  #9ec8f0;
+    --amber-bg: #3d2d17;
+    --amber-tx: #f5c478;
+    --green-bg: #1d3016;
+    --green-tx: #a3d97e;
+    --red-bg:   #3d1a1a;
+    --red-tx:   #f29999;
+    --gray-bg:  #33312f;
+    --gray-tx:  #c2c0bc;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: 'Hiragino Maru Gothic ProN', 'Yu Gothic UI', sans-serif; 
+  background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; position: relative; overflow-x: hidden;
+  background-image: radial-gradient(var(--border) 1.5px, transparent 0), linear-gradient(to bottom, transparent 80%, rgba(210,225,190,0.1) 100%); background-size: 24px 24px, 100% 100%;
+}
+
+.forest-bg-element { position: fixed; font-size: 40px; opacity: 0.12; pointer-events: none; z-index: -1; user-select: none; }
+@media (max-width: 1200px) { .forest-bg-element { display: none; } }
+
+.side-zoo { position: fixed; top: 120px; width: 80px; display: flex; flex-direction: column; gap: 30px; align-items: center; z-index: 10; user-select: none; }
+.side-zoo.left { left: 20px; } .side-zoo.right { right: 20px; }
+@media (max-width: 1250px) { .side-zoo { display: none; } }
+
+.zoo-friend { font-size: 32px; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+.zoo-friend:hover { transform: scale(1.4) rotate(10deg); }
+.zoo-friend::after { content: "Click Me🐾"; position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%) scale(0); font-size: 9px; background: var(--text); color: #fff; padding: 2px 6px; border-radius: 8px; white-space: nowrap; opacity: 0; transition: all 0.2s; }
+.zoo-friend:hover::after { transform: translateX(-50%) scale(1); opacity: 0.9; }
+
+#parade-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; overflow: hidden; }
+.parade-animal { position: absolute; font-size: 48px; will-change: right; animation: runCross 2.5s linear forwards; }
+@keyframes runCross {
+  0% { right: -100px; transform: scaleX(1); }
+  50% { transform: scaleX(1) translateY(-15px); }
+  51% { transform: scaleX(1) translateY(0px); }
+  75% { transform: scaleX(1) translateY(-15px); }
+  100% { right: 100vw; transform: scaleX(1) translateY(0px); }
+}
+
+/* ── 🐈‍⬛ 【隠しコマンド】巨大ネコ用スタイル ── */
+#giant-cat {
+  position: fixed; bottom: -600px; left: 50%; transform: translateX(-50%);
+  font-size: 500px; line-height: 1; z-index: 99999; pointer-events: auto; cursor: pointer;
+  transition: bottom 0.8s cubic-bezier(0.19, 1, 0.22, 1); user-select: none;
+}
+#giant-cat.reveal { bottom: -120px; }
+
+.header { background: var(--surface); border-bottom: 3px dashed var(--border); padding: 0 1.5rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 20; }
+.header-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.logo { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius); padding: 4px; }
+.tab { padding: 6px 16px; font-size: 12px; border: none; background: transparent; color: var(--text2); border-radius: 12px; cursor: pointer; transition: all .15s; font-weight: 600; }
+.tab.active { background: var(--surface); color: var(--text); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+.sync { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-tx); flex-shrink: 0; }
+.sync-dot.err { background: var(--red-tx); } .sync-dot.warn { background: var(--amber-tx); }
+
+.main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 5rem; position: relative; z-index: 2; }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+.sc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1rem; box-shadow: 0 6px 14px rgba(120,100,80,0.04); text-align: center; transition: transform 0.2s; }
+.sc:hover { transform: translateY(-2px); }
+.sc-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; font-weight: 700; }
+.sc-num { font-size: 24px; font-weight: 700; line-height: 1; }
+
+.toolbar { display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+.toolbar input, .toolbar select { height: 40px; padding: 0 14px; font-size: 13px; border: 2px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+.toolbar input { flex: 1; min-width: 160px; max-width: 260px; }
+.toolbar input:focus, .toolbar select:focus { border-color: var(--blue); background: var(--surface3); }
+
+.btn-primary { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; font-size: 13px; font-weight: 700; background: #f3a9b1; border: none; border-radius: var(--radius); cursor: pointer; color: #fff; margin-left: auto; white-space: nowrap; box-shadow: 0 4px 10px rgba(243,169,177,0.4); transition: all 0.2s; }
+.btn-primary:hover { opacity: .95; transform: translateY(-2px) scale(1.02); }
+.btn-secondary { display: flex; align-items: center; gap: 5px; height: 36px; padding: 0 14px; font-size: 12px; font-weight: 600; background: var(--surface); border: 2px solid var(--border2); border-radius: var(--radius); cursor: pointer; color: var(--text2); transition: all 0.15s; }
+.btn-secondary:hover { background: var(--surface2); color: var(--text); transform: translateY(-1px); }
+
+.btn-festival { background: #f6c86b; border: none; color: #5c3e03; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(246,200,107,0.4); margin-left: 4px; transition: all 0.1s; }
+.btn-festival:hover { transform: scale(1.08); background: #fcd98c; }
+
+tr.task-done-row { opacity: 0.45; background: rgba(0,0,0,0.02) !important; }
+tr.task-done-row .task-name { text-decoration: line-through rgba(0,0,0,0.3); }
+
+.proj-list { display: flex; flex-direction: column; gap: 16px; }
+.proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 8px 20px rgba(120,100,80,0.06); overflow: hidden; transition: all 0.2s; }
+
+.p-theme-default { }
+.p-theme-strawberry  { background: #fffcfd; border-color: #fbcacf; } .p-theme-strawberry .proj-header { background: #fff0f2; }
+.p-theme-cherry      { background: #fffbfa; border-color: #fbcbc5; } .p-theme-cherry .proj-header { background: #ffece9; }
+.p-theme-orange      { background: #fffdfa; border-color: #fbd6b5; } .p-theme-orange .proj-header { background: #ffeedd; }
+.p-theme-lemon       { background: #fffef9; border-color: #fae796; } .p-theme-lemon .proj-header { background: #fff9cc; }
+.p-theme-melon       { background: #fafdf8; border-color: #beebd1; } .p-theme-melon .proj-header { background: #e2f7eb; }
+.p-theme-mint        { background: #f8fdfd; border-color: #bbf0eb; } .p-theme-mint .proj-header { background: #e0f9f6; }
+.p-theme-soda        { background: #f9fbfd; border-color: #bedaf3; } .p-theme-soda .proj-header { background: #e2effa; }
+.p-theme-sky         { background: #f6faff; border-color: #aed1f7; } .p-theme-sky .proj-header { background: #dcebff; }
+.p-theme-grape       { background: #fbf9fd; border-color: #dccef3; } .p-theme-grape .proj-header { background: #eee2fa; }
+.p-theme-lavender    { background: #fdf9fd; border-color: #eacfec; } .p-theme-lavender .proj-header { background: #f9e2fa; }
+.p-theme-cocoa       { background: #faf8f5; border-color: #ded1c1; } .p-theme-cocoa .proj-header { background: #f1e9de; }
+.p-theme-deepforest  { background: #f5f6f2; border-color: #cbd4bf; } .p-theme-deepforest .proj-header { background: #e4ebd9; }
+
+.proj-header { display: flex; align-items: center; gap: 0; cursor: pointer; user-select: none; min-height: 60px; }
+.proj-chevron { flex-shrink: 0; width: 52px; height: 60px; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 16px; transition: transform .2s; }
+.proj-card.open .proj-chevron { transform: rotate(90deg); }
+.proj-name { flex: 1; font-size: 16px; font-weight: 700; color: var(--text); padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proj-meta { display: flex; align-items: center; gap: 10px; padding: 0 16px 0 8px; flex-shrink: 0; }
+.proj-count { font-size: 12px; color: var(--text2); white-space: nowrap; font-weight: 700; }
+.proj-status-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+.mini-pill { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.proj-actions { display: flex; gap: 4px; padding-right: 16px; flex-shrink: 0; opacity: 0; transition: opacity .1s; }
+.proj-header:hover .proj-actions { opacity: 1; }
+
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--text2); padding: 6px; border-radius: 10px; font-size: 15px; display: flex; align-items: center; transition: all 0.1s; }
+.icon-btn:hover { color: var(--text); background: rgba(0,0,0,0.06); transform: scale(1.1); }
+
+.task-table-wrap { overflow: hidden; max-height: 0; transition: max-height .25s ease; }
+.proj-card.open .task-table-wrap { max-height: 2000px; background: var(--surface); }
+.task-divider { border-top: 1px solid var(--border); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+thead th { background: var(--surface2); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; letter-spacing: .04em; }
+.col-task     { width: 22%; }
+.col-status   { width: 15%; }
+.col-next     { width: 29%; }
+.col-note     { width: 18%; }
+.col-owner    { width: 11%; }
+.col-actions  { width: 5%; }
+
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface3); }
+td { padding: 12px 12px; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.multiline { white-space: normal; word-break: break-all; font-size: 12px; line-height: 1.6; }
+.task-name { font-weight: 700; color: var(--text); }
+.note-text { color: var(--text2); }
+.row-actions { display: flex; gap: 2px; opacity: 0; transition: opacity .1s; }
+tr:hover .row-actions { opacity: 1; }
+
+.add-task-row { border-top: 1px solid var(--border); }
+.add-task-btn { display: flex; align-items: center; gap: 6px; padding: 12px 16px; font-size: 12px; color: var(--text2); font-weight: 700; background: none; border: none; cursor: pointer; width: 100%; transition: all .1s; }
+.add-task-btn:hover { color: var(--blue-tx); background: var(--blue-bg); }
+
+/* ── 💬 【新機能】どうぶつおしゃべり場（掲示板）スタイル ── */
+.chat-section { background: var(--surface3); padding: 16px; border-top: 1px dashed var(--border); }
+.chat-title { font-size: 12px; font-weight: 800; color: var(--text2); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+.chat-history { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-right: 4px; }
+.chat-bubble { display: flex; gap: 8px; align-items: flex-start; animation: fadeInChat 0.2s ease forwards; }
+@keyframes fadeInChat { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.chat-avatar { font-size: 20px; background: #fff; border: 1.5px solid var(--border2); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); flex-shrink: 0; }
+.chat-content-box { background: #fff; padding: 8px 12px; border-radius: 14px; border: 1px solid var(--border); font-size: 12px; max-width: 85%; }
+.chat-meta { font-size: 10px; color: var(--text3); font-weight: 700; margin-bottom: 2px; }
+.chat-text { line-height: 1.4; word-break: break-all; }
+.chat-input-row { display: flex; gap: 6px; align-items: center; }
+.chat-name-input { width: 90px !important; height: 32px !important; padding: 0 8px !important; font-size: 11px !important; }
+.chat-msg-input { flex: 1; height: 32px !important; padding: 0 10px !important; font-size: 12px !important; }
+.btn-chat-send { background: var(--blue); color: #fff; border: none; height: 32px; padding: 0 12px; border-radius: var(--radius); font-size: 11px; font-weight: 700; cursor: pointer; }
+.btn-chat-send:hover { opacity: 0.9; }
+
+.empty-proj { text-align: center; padding: 4rem 1rem; color: var(--text3); }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.s-not_started { background: var(--gray-bg);  color: var(--gray-tx); }
+.s-in_progress  { background: var(--blue-bg);  color: var(--blue-tx); }
+.s-waiting      { background: var(--amber-bg); color: var(--amber-tx); }
+.s-done         { background: var(--green-bg); color: var(--green-tx); }
+.s-blocked      { background: var(--red-bg);   color: var(--red-tx); }
+
+.owner-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; background: #fff; color: var(--text); border: 2px solid var(--border2); white-space: nowrap; max-width: 100%; }
+
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(50,40,30,0.4); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px); }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 2rem; width: min(520px, 94vw); max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 6px; letter-spacing: .04em; }
+.field input, .field select, .field textarea { width: 100%; padding: 11px 14px; font-size: 13px; border: 2px solid var(--border2); border-radius: var(--radius); background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); background: var(--surface3); }
+.field textarea { resize: vertical; min-height: 75px; line-height: 1.5; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.75rem; }
+.btn-cancel { padding: 10px 20px; font-size: 13px; font-weight:700; background: var(--surface2); border: none; border-radius: var(--radius); cursor: pointer; color: var(--text2); }
+.btn-save { padding: 10px 22px; font-size: 13px; font-weight: 700; background: var(--blue); border: none; border-radius: var(--radius); cursor: pointer; color: #fff; box-shadow: 0 4px 10px rgba(125,180,227,0.4); }
+
+.picker-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; background: var(--surface2); padding: 10px; border-radius: var(--radius); max-height: 140px; overflow-y: auto; }
+.picker-btn { font-size: 20px; background: none; border: 2px solid transparent; cursor: pointer; padding: 6px; border-radius: 10px; transition: all 0.1s; display: flex; align-items: center; justify-content: center; }
+.picker-btn.selected { background: var(--surface); border-color: var(--blue); transform: scale(1.15); }
+
+.color-circle { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.1); cursor: pointer; transition: all 0.12s; }
+.color-circle.selected { transform: scale(1.2); border-color: var(--text); box-shadow: 0 0 6px rgba(0,0,0,0.25); }
+
+.toast { position: fixed; bottom: 2.5rem; left: 50%; transform: translateX(-50%); background: #423830; color: #fff; padding: 12px 28px; border-radius: 30px; font-size: 13px; font-weight: 700; z-index: 300; opacity: 0; transition: opacity .25s, bottom 0.25s; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,0.15); text-align: center; }
+.toast.show { opacity: 1; bottom: 3rem; }
+</style>
+</head>
+<body>
+
+<div id="parade-container"></div>
+
+<div id="giant-cat" onclick="toggleGiantCat()">🐈‍⬛</div>
+
+<div class="forest-bg-element" style="top: 90px; left: 4%; opacity: 0.08;">☁️</div>
+<div class="forest-bg-element" style="top: 250px; left: 2%; font-size: 50px;">🌲</div>
+<div class="forest-bg-element" style="top: 600px; left: 5%;">🌳</div>
+<div class="forest-bg-element" style="top: 160px; right: 3%; font-size: 45px;">🌲</div>
+<div class="forest-bg-element" style="top: 450px; right: 1%; opacity: 0.08;">☁️</div>
+<div class="forest-bg-element" style="top: 750px; right: 4%;">🌻</div>
+
+<div class="side-zoo left">
+  <div class="zoo-friend" onclick="cryAnimal('🐰', 'ぴょん！タスクがんばって！')">🐰</div>
+  <div class="zoo-friend" onclick="cryAnimal('🐱', 'にゃ〜お。スプシ同期した？')">🐱</div>
+  <div class="zoo-friend" onclick="cryAnimal('🦊', 'コンコン！進捗どうですか？')">🦊</div>
+  <div class="zoo-friend" onclick="cryAnimal('🐥', 'ピヨピヨ！よく確認してね')">🐥</div>
+</div>
+
+<div class="side-zoo right">
+  <div class="zoo-friend" onclick="cryAnimal('🐻', 'クマー！お疲れ様ですのクマ')">🐻</div>
+  <div class="zoo-friend" onclick="cryAnimal('🐼', '笹もぐもぐ。休憩も大切だよ')">🐼</div>
+  <div class="zoo-friend" onclick="cryAnimal('🐶', 'わんわん！応援してるワン！')">🐶</div>
+  <div class="zoo-friend" onclick="cryAnimal('🐸', 'ケロケロ！完了タスクがいっぱいだ')">🐸</div>
+</div>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <span>🐾</span>
+      わくわく動物の森 管理シート
+      <button class="btn-festival" onclick="startAnimalParade()">🏮 お祭りモード</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="tab-all"  onclick="setView('all')">みんなのシート</button>
+      <button class="tab"        id="tab-mine" onclick="setView('mine')">じぶんのシート</button>
+    </div>
+  </div>
+  <div class="sync">
+    <span class="sync-dot warn" id="sync-dot"></span>
+    <span id="sync-text">おはなし中…</span>
+  </div>
+</header>
+
+<main class="main">
+  <div id="setup-banner" class="setup-banner" style="display:none">
+    <strong>⚠ Firebase未設定</strong>：<code>FIREBASE_CONFIG</code> を設定してね。
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="toolbar">
+    <input  type="text" id="search" placeholder="なにかお探しですか？ 🔍" oninput="renderProjects()">
+    <select id="filter-status" onchange="renderProjects()">
+      <option value="">すべてのステータス</option>
+      <option value="not_started">💤 未着手</option>
+      <option value="in_progress">🌱 進行中</option>
+      <option value="waiting">⏳ 待ち・確認中</option>
+      <option value="done">✨ 完了</option>
+      <option value="blocked">🚧 ブロック中</option>
+    </select>
+    <select id="filter-owner" onchange="renderProjects()">
+      <option value="">だれのタスク？</option>
+    </select>
+    <button class="btn-secondary" onclick="toggleAllProjects()" id="expand-btn">
+      <i class="ti ti-chevrons-down"></i> すべてひらく
+    </button>
+    <button class="btn-secondary" onclick="drawOmikuji()">
+      <i class="ti ti-crystal-ball"></i> 🔮 おみくじ
+    </button>
+    <button class="btn-secondary" onclick="syncToSpreadsheet()" id="sync-sheet-btn">
+      <i class="ti ti-table-share"></i> スプシへ届ける
+    </button> 
+    <button class="btn-primary" onclick="openProjectModal()">
+      <i class="ti ti-plus"></i> 新しいプロジェクト
+    </button>
+  </div>
+
+  <div class="proj-list" id="proj-list"></div>
+</main>
+
+<div class="modal-bg" id="task-modal-bg" onclick="onBgClick(event,'task-modal-bg')">
+  <div class="modal">
+    <div class="modal-title" id="task-modal-title">タスクを追加</div>
+    <div class="field">
+      <label>プロジェクト名</label>
+      <input id="f-proj-display" disabled style="color:var(--text2);background:var(--surface2)">
+    </div>
+    <div class="field"><label>タスク名 *</label><input id="f-task" placeholder="例：かわいいイラストをあつめる"></div>
+    <div class="field"><label>今のじょうたい</label>
+      <select id="f-status">
+        <option value="not_started">💤 未着手</option>
+        <option value="in_progress">🌱 進行中</option>
+        <option value="waiting">⏳ 待ち・確認中</option>
+        <option value="done">✨ 完了</option>
+        <option value="blocked">🚧 ブロック中</option>
+      </select>
+    </div>
+    <div class="field"><label>つぎにやること</label><textarea id="f-next" placeholder="次の一歩をかこう"></textarea></div>
+    <div class="field"><label>メモ・まめちしき</label><textarea id="f-note" placeholder="補足や残しておきたいこと"></textarea></div>
+    <div class="field">
+      <label>だれがやる？（担当者）</label>
+      <input id="f-owner" list="owner-list" placeholder="おなまえを入力" oninput="onOwnerInput()">
+      <datalist id="owner-list"></datalist>
+      
+      <div class="animal-select-wrap" style="margin-top: 8px;">
+        <label style="margin:0; font-size:11px;">どうぶつ姿（全24種）：</label>
+        <div class="picker-grid" id="animal-picker"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('task-modal-bg')">やめる</button>
+      <button class="btn-save"   onclick="saveTask()">できた</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="proj-modal-bg" onclick="onBgClick(event,'proj-modal-bg')">
+  <div class="modal">
+    <div class="modal-title" id="proj-modal-title">新しいプロジェクト</div>
+    <div class="field">
+      <label>プロジェクトのお名前 *</label>
+      <input id="f-proj-name" placeholder="例：秋のもりもりキャンペーン">
+    </div>
+    
+    <div class="field">
+      <label>お部屋のアイコン 🏕（全28種！）</label>
+      <div class="picker-grid" id="proj-icon-picker"></div>
+    </div>
+
+    <div class="field">
+      <label>お部屋の背景カラー 🎨 (全12色)</label>
+      <div class="picker-grid" id="proj-color-picker" style="gap: 10px; padding: 10px;"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('proj-modal-bg')">やめる</button>
+      <button class="btn-save"   onclick="saveProject()">つくる</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STATUS = {
+  not_started: { label:'未着手',       dot:'💤', cls:'s-not_started' },
+  in_progress: { label:'進行中',       dot:'🌱', cls:'s-in_progress' },
+  view_waiting:{ label:'待ち・確認中', dot:'⏳', cls:'s-waiting' }, /* 互換調整用 */
+  waiting:     { label:'待ち・確認中', dot:'⏳', cls:'s-waiting' },
+  done:        { label:'完了',         dot:'✨', cls:'s-done' },
+  blocked:     { label:'ブロック中',   dot:'🚧', cls:'s-blocked' },
+};
+
+const ANIMALS = ['🐰','🐻','🐱','🐶','🦊','🦁','🐹','🐼','🐨','🐥','🐸','🐵','🦄','🐗','🐺','🐮','🦁','🐯','🦒','🦫','🦦','🦭','🦖','🦈'];
+const PROJ_ICONS = ['📂','⛺','🚀','🎨','📢','🎁','🍋','🍎','⭐','🍀','🎉','🔑','🍙','🛸','📈','💻','🔥','🔮','💎','🧸','👒','☕','🧩','🏎️','🧁','🥷','🦖','🏝️'];
+
+const PROJ_COLORS = [
+  { key: 'default',    code: '#ffffff' },
+  { key: 'strawberry', code: '#fff0f2' },
+  { key: 'cherry',     code: '#ffece9' },
+  { key: 'orange',     code: '#ffeedd' },
+  { key: 'lemon',      code: '#fff9cc' },
+  { key: 'melon',      code: '#e2f7eb' },
+  { key: 'mint',       code: '#e0f9f6' },
+  { key: 'soda',       code: '#e2effa' },
+  { key: 'sky',        code: '#dcebff' },
+  { key: 'grape',      code: '#eee2fa' },
+  { key: 'lavender',   code: '#f9e2fa' },
+  { key: 'cocoa',      code: '#f1e9de' },
+  { key: 'deepforest', code: '#e4ebd9' }
+];
+
+let ownerAnimals = {}; 
+let tasks    = {};
+let projects = {};
+let chats    = {}; // { projectKey: { chatKey: { name, animal, message, timestamp } } }
+let openProjects = new Set();
+let allOpen = false;
+let view = 'all';
+let editingTaskKey   = null;
+let editingProjKey   = null;
+let modalProjKey     = null;
+let selectedAnimal   = '🐰';
+let selectedProjIcon = '📂';
+let selectedProjColor = 'default';
+let db = null;
+
+let undoStack = [];
+const MAX_UNDO_DEPTH = 5;
+
+function pushToUndoStack() {
+  undoStack.push({
+    tasks: JSON.parse(JSON.stringify(tasks)),
+    projects: JSON.parse(JSON.stringify(projects)),
+    ownerAnimals: JSON.parse(JSON.stringify(ownerAnimals))
+  });
+  if (undoStack.length > MAX_UNDO_DEPTH) undoStack.shift();
+}
+
+async function triggerUndo() {
+  if (undoStack.length === 0) { showToast("戻れる履歴がありません 🍃"); return; }
+  const prev = undoStack.pop();
+  tasks = prev.tasks; projects = prev.projects; ownerAnimals = prev.ownerAnimals;
+  if (db) {
+    try {
+      await db.ref('tasks').set(tasks);
+      await db.ref('projects').set(projects);
+      await db.ref('ownerAnimals').set(ownerAnimals);
+    } catch (e) { console.error(e); }
+  }
+  showToast("⏰ ひとつ前の状態に戻しました！"); renderAll();
+}
+
+// ── 🐈‍⬛ 隠しコマンド（Ctrl + Shift + Enter） ──
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Enter') {
+    e.preventDefault();
+    toggleGiantCat();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !document.querySelector('.modal-bg.open')) {
+    e.preventDefault(); triggerUndo();
+  }
+});
+
+function toggleGiantCat() {
+  const cat = document.getElementById('giant-cat');
+  cat.classList.toggle('reveal');
+  if (cat.classList.contains('reveal')) {
+    showToast("🙀 【警告】巨大なネコがあらわれた！！！");
+  } else {
+    showToast("🌲 ネコは満足して森へ帰っていきました。");
+  }
+}
+
+// ── 🔮 おみくじ占い機能 ──
+function drawOmikuji() {
+  const lucks = ["🌟 超大吉", "✨ 大吉", "🌱 中吉", "🍂 小吉", "☁️ 吉", "🍊 みかん吉"];
+  const actions = ["どんぐりを3個拾う", "ウサギ姿の人に挨拶する", "お祭りモードを3回連打する", "お茶をのんで一息つく", "完了タスクを眺めてニヤニヤする", "深呼吸を3回する"];
+  
+  const randomLuck = lucks[Math.floor(Math.random() * lucks.length)];
+  const randomAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+  const randomAction = actions[Math.floor(Math.random() * actions.length)];
+  
+  alert(`🔮 もりの占い結果 🔮\n\n【今日の運勢】 ${randomLuck}\n【ラッキーどうぶつ】 ${randomAnimal}\n【ラッキーアクション】 ${randomAction} と吉！`);
+}
+
+function cryAnimal(emoji, text) { showToast(`${emoji} 「${text}」`); }
+
+function startAnimalParade() {
+  const container = document.getElementById('parade-container');
+  showToast("🏮 ワッショイ！どうぶつ大行進のはじまりだー！ 🎉");
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+      const animal = document.createElement('div'); animal.className = 'parade-animal';
+      animal.innerText = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+      animal.style.top = (Math.random() * 85 + 5) + 'vh';
+      const duration = Math.random() * 1.2 + 1.8; animal.style.animationDuration = duration + 's';
+      container.appendChild(animal); setTimeout(() => animal.remove(), duration * 1000);
+    }, i * 120);
+  }
+}
+
+function initPickers() {
+  document.getElementById('animal-picker').innerHTML = ANIMALS.map(a => `<button type="button" class="picker-btn" data-animal="${a}" onclick="selectAnimal('${a}')">${a}</button>`).join('');
+  document.getElementById('proj-icon-picker').innerHTML = PROJ_ICONS.map(i => `<button type="button" class="picker-btn" data-picon="${i}" onclick="selectProjIcon('${i}')">${i}</button>`).join('');
+  document.getElementById('proj-color-picker').innerHTML = PROJ_COLORS.map(c => `<div class="color-circle" data-pcolor="${c.key}" style="background:${c.code}" onclick="selectProjColor('${c.key}')"></div>`).join('');
+}
+
+function selectAnimal(a) {
+  selectedAnimal = a;
+  document.querySelectorAll('#animal-picker .picker-btn').forEach(btn => btn.classList.toggle('selected', btn.getAttribute('data-animal') === a));
+}
+function selectProjIcon(i) {
+  selectedProjIcon = i;
+  document.querySelectorAll('#proj-icon-picker .picker-btn').forEach(btn => btn.classList.toggle('selected', btn.getAttribute('data-picon') === i));
+}
+function selectProjColor(cKey) {
+  selectedProjColor = cKey;
+  document.querySelectorAll('#proj-color-picker .color-circle').forEach(div => div.classList.toggle('selected', div.getAttribute('data-pcolor') === cKey));
+}
+
+function onOwnerInput() {
+  const name = document.getElementById('f-owner').value.trim();
+  if(name && ownerAnimals[name]) { selectAnimal(ownerAnimals[name]); } 
+  else if (name) {
+    let code = 0; for (let i = 0; i < name.length; i++) code += name.charCodeAt(i);
+    selectAnimal(ANIMALS[code % ANIMALS.length]);
+  }
+}
+
+function getAnimalByName(name) {
+  if (!name) return '🐾';
+  if (ownerAnimals[name]) return ownerAnimals[name];
+  let code = 0; for (let i = 0; i < name.length; i++) code += name.charCodeAt(i);
+  return ANIMALS[code % ANIMALS.length];
+}
+
+function initFirebase() {
+  initPickers();
+  if (FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
+    document.getElementById('setup-banner').style.display = 'block';
+    setSyncState('err', 'デモモード 🐾'); useDemoData(); return;
+  }
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG); db = firebase.database();
+    db.ref('.info/connected').on('value', s => {
+      if (s.val()) setSyncState('ok',  'みんなと同期中 🌍');
+      else         setSyncState('err', '電波をさがし中… 📶');
+    });
+    db.ref('ownerAnimals').on('value', s => { ownerAnimals = s.val() || {}; });
+    db.ref('projects').on('value', s => { projects = s.val() || {}; renderAll(); });
+    db.ref('tasks').on('value',    s => { tasks    = s.val() || {}; renderAll(); });
+    db.ref('chats').on('value',    s => { chats    = s.val() || {}; renderAll(); });
+  } catch(e) { setSyncState('err','エラー'); console.error(e); }
+}
+
+function setSyncState(state, text) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot' + (state==='ok' ? '' : state==='err' ? ' err' : ' warn');
+  document.getElementById('sync-text').textContent = text;
+}
+
+function useDemoData() {
+  projects = {
+    p1: { name:'もぐもぐSNS広告リニューアル', icon:'🎨', color:'strawberry', createdAt: Date.now()-3000 },
+    p2: { name:'どんぐりLP改修',             icon:'⛺', color:'orange', createdAt: Date.now()-2000 },
+  };
+  tasks = {
+    t1: { project:'p1', task:'かわいいイラストの収集', status:'in_progress', nextAction:'ウサギさんに相談する', note:'パステルカラー多めで！', owner:'田中', createdAt:Date.now()-500 },
+    t2: { project:'p1', task:'ターゲット層の調査',     status:'done',        nextAction:'完了',             note:'',                   owner:'佐藤', createdAt:Date.now()-400 },
+    t3: { project:'p2', task:'どんぐりボタンの調整',   status:'not_started', nextAction:'色を茶色にする',     note:'',                   owner:'田中', createdAt:Date.now()-100 },
+  };
+  chats = {
+    p1: {
+      c1: { name: '田中', animal: '🐰', message: 'イラストあつめてます！パステル調がいい感じ。', timestamp: Date.now() - 100000 }
+    }
+  };
+  ownerAnimals = { '田中': '🐰', '佐藤': '🐱' }; openProjects = new Set(['p1','p2']); renderAll();
+}
+
+function renderAll() { renderSummary(); renderOwnerFilter(); renderProjects(); }
+
+function renderSummary() {
+  const arr = Object.values(tasks);
+  const c = {not_started:0,in_progress:0,waiting:0,done:0,blocked:0};
+  arr.forEach(t => { if(c[t.status]!==undefined) c[t.status]++; });
+  document.getElementById('summary').innerHTML = `
+    <div class="sc"><div class="sc-label">📂 プロジェクト</div><div class="sc-num">${Object.keys(projects).length}</div></div>
+    <div class="sc"><div class="sc-label">📝 ぜんぶのタスク</div><div class="sc-num">${arr.length}</div></div>
+    <div class="sc"><div class="sc-label">🌱 進行中</div><div class="sc-num" style="color:var(--blue-tx)">${c.in_progress}</div></div>
+    <div class="sc"><div class="sc-label">⏳ まちあわせ</div><div class="sc-num" style="color:var(--amber-tx)">${c.waiting}</div></div>
+    <div class="sc"><div class="sc-label">✨ できた！</div><div class="sc-num" style="color:var(--green-tx)">${c.done}</div></div>
+    <div class="sc"><div class="sc-label">🚧 おや？</div><div class="sc-num" style="color:var(--red-tx)">${c.blocked}</div></div>
+  `;
+}
+
+function renderOwnerFilter() {
+  const owners = [...new Set(Object.values(tasks).map(t=>t.owner).filter(Boolean))].sort();
+  const sel = document.getElementById('filter-owner').value;
+  document.getElementById('filter-owner').innerHTML = '<option value="">だれのタスク？</option>' + owners.map(o=> `<option value="${esc(o)}"${o===sel?' selected':''}>${ownerAnimals[o]||'🐾'} ${esc(o)}</option>`).join('');
+  document.getElementById('owner-list').innerHTML = owners.map(o=>`<option value="${esc(o)}">`).join('');
+}
+
+function renderProjects() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const fs     = document.getElementById('filter-status').value;
+  const fo     = document.getElementById('filter-owner').value;
+  const list = document.getElementById('proj-list');
+  const projEntries = Object.entries(projects).sort((a,b) => (a[1].createdAt||0)-(b[1].createdAt||0));
+
+  if (!projEntries.length) {
+    list.innerHTML = `<div class="empty-proj"><i class="ti ti-clipboard-off"></i><p>まだ部屋がありません</p><button class="btn-primary" style="margin:0 auto" onclick="openProjectModal()"><i class="ti ti-plus"></i> 部屋を作る</button></div>`; return;
+  }
+
+  let html = '';
+  for (const [pk, proj] of projEntries) {
+    let ptasks = Object.entries(tasks).filter(([,t]) => t.project === pk).map(([k,t]) => ({key:k,...t})).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+    if (fs) ptasks = ptasks.filter(t => t.status === fs);
+    if (fo) ptasks = ptasks.filter(t => t.owner  === fo);
+    if (view === 'mine' && fo) ptasks = ptasks.filter(t => t.owner === fo);
+    if (search) {
+      const s = search; const projMatch = proj.name.toLowerCase().includes(s);
+      if (!projMatch) ptasks = ptasks.filter(t => (t.task||'').toLowerCase().includes(s) || (t.nextAction||'').toLowerCase().includes(s));
+      if (!projMatch && !ptasks.length) continue;
+    }
+
+    const isOpen = openProjects.has(pk);
+    const totalCount = Object.values(tasks).filter(t=>t.project===pk).length;
+    const stCounts = {}; Object.values(tasks).filter(t=>t.project===pk).forEach(t=>{ stCounts[t.status]=(stCounts[t.status]||0)+1; });
+    const pills = Object.entries(stCounts).map(([s,n])=>`<span class="mini-pill badge ${STATUS[s]?.cls || 's-not_started'}">${STATUS[s]?.dot || '⬜'} ${n}</span>`).join('');
+    const pColorClass = proj.color ? `p-theme-${proj.color}` : 'p-theme-default';
+
+    // 💬 チャット履歴の生成
+    const pChats = Object.values(chats[pk] || {}).sort((a,b) => (a.timestamp||0)-(b.timestamp||0));
+    const chatHtml = pChats.map(c => `
+      <div class="chat-bubble">
+        <div class="chat-avatar">${c.animal || '🐾'}</div>
+        <div class="chat-content-box">
+          <div class="chat-meta">${esc(c.name)}</div>
+          <div class="chat-text">${esc(c.message)}</div>
+        </div>
+      </div>
+    `).join('');
+
+    html += `
+    <div class="proj-card ${pColorClass}${isOpen?' open':''}" id="pc-${pk}">
+      <div class="proj-header" onclick="toggleProject('${pk}')">
+        <span class="proj-chevron"><i class="ti ti-chevron-right"></i></span>
+        <span class="proj-name">${proj.icon||'📂'} ${esc(proj.name)}</span>
+        <div class="proj-meta">
+          <span class="proj-status-pills">${pills}</span>
+          <span class="proj-count">${totalCount}こ</span>
+        </div>
+        <div class="proj-actions" onclick="event.stopPropagation()">
+          <button class="icon-btn" onclick="openProjectModal('${pk}')" title="部屋をカスタムする"><i class="ti ti-edit"></i></button>
+          <button class="icon-btn" onclick="deleteProject('${pk}')" title="さよならする"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <div class="task-table-wrap">
+        <div class="task-divider">
+        ${ptasks.length ? `
+        <table>
+          <thead><tr>
+            <th class="col-task">タスク名</th>
+            <th class="col-status">じょうたい</th>
+            <th class="col-next">つぎにやること</th>
+            <th class="col-note">メモ</th>
+            <th class="col-owner">だれがやる？</th>
+            <th class="col-actions"></th>
+          </tr></thead>
+          <tbody>
+            ${ptasks.map(t => {
+              const st = STATUS[t.status]||STATUS.not_started;
+              const isDoneClass = t.status === 'done' ? 'task-done-row' : '';
+              return `<tr class="${isDoneClass}">
+                <td class="task-name" title="${esc(t.task)}">📌 ${esc(t.task)}</td>
+                <td><span class="badge ${st.cls}">${st.dot} ${st.label}</span></td>
+                <td class="multiline">${esc(t.nextAction||'—')}</td>
+                <td class="multiline note-text">${esc(t.note||'—')}</td>
+                <td>${t.owner ? `<span class="owner-chip"><span>${ownerAnimals[t.owner] || '🐾'}</span> ${esc(t.owner)}</span>` : '—'}</td>
+                <td><div class="row-actions">
+                  <button class="icon-btn" onclick="openTaskModal('${pk}','${t.key}')" title="なおす"><i class="ti ti-edit"></i></button>
+                  <button class="icon-btn" onclick="deleteTask('${t.key}')" title="けす"><i class="ti ti-trash"></i></button>
+                </div></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>` : `<div style="padding:1.25rem;font-size:12px;color:var(--text3)">タスクはありません 🐇</div>`}
+        
+        <div class="add-task-row">
+          <button class="add-task-btn" onclick="openTaskModal('${pk}')"><i class="ti ti-plus" style="font-size:14px"></i> タスクをあつめる</button>
+        </div>
+
+        <div class="chat-section">
+          <div class="chat-title"><i class="ti ti-messages"></i> もりのおしゃべり場 (${pChats.length})</div>
+          <div class="chat-history" id="chat-hist-${pk}">
+            ${chatHtml || '<div style="font-size:11px;color:var(--text3);padding:4px 0;">まだ誰も喋っていません 🌳</div>'}
+          </div>
+          <div class="chat-input-row" onclick="event.stopPropagation()">
+            <input type="text" class="chat-name-input" id="c-name-${pk}" placeholder="おなまえ" oninput="localStorage.setItem('forest_user', this.value)">
+            <input type="text" class="chat-msg-input" id="c-msg-${pk}" placeholder="どうぶつの姿でコメントをのこそう…" onkeydown="if(event.key==='Enter')sendComment('${pk}')">
+            <button class="btn-chat-send" onclick="sendComment('${pk}')">送信</button>
+          </div>
+        </div>
+
+        </div>
+      </div>
+    </div>`;
+  }
+  list.innerHTML = html || `<div class="empty-proj"><i class="ti ti-search"></i><p>みつかりませんでした 🦊</p></div>`;
+
+  // チャット欄を自動スクロール
+  Object.keys(projects).forEach(pk => {
+    const el = document.getElementById(`chat-hist-${pk}`);
+    if(el) el.scrollTop = el.scrollHeight;
+    const nameEl = document.getElementById(`c-name-${pk}`);
+    if(nameEl && localStorage.getItem('forest_user')) nameEl.value = localStorage.getItem('forest_user');
+  });
+}
+
+// 💬 コメントを送信
+async function sendComment(pk) {
+  const nameEl = document.getElementById(`c-name-${pk}`);
+  const msgEl = document.getElementById(`c-msg-${pk}`);
+  const name = nameEl.value.trim();
+  const message = msgEl.value.trim();
+  if(!name || !message) { alert("おなまえとメッセージを入れてね 🐻"); return; }
+  
+  const animal = getAnimalByName(name);
+  const cdata = { name, animal, message, timestamp: Date.now() };
+
+  if(!db) {
+    if(!chats[pk]) chats[pk] = {};
+    chats[pk]['demo_c_' + Date.now()] = cdata;
+    msgEl.value = ''; renderProjects(); return;
+  }
+  await db.ref(`chats/${pk}`).push(cdata);
+  msgEl.value = '';
+}
+
+function toggleProject(pk) {
+  if (openProjects.has(pk)) openProjects.delete(pk); else openProjects.add(pk);
+  const card = document.getElementById('pc-'+pk); if (card) card.classList.toggle('open', openProjects.has(pk));
+}
+function toggleAllProjects() {
+  allOpen = !allOpen; const btn = document.getElementById('expand-btn');
+  if (allOpen) { Object.keys(projects).forEach(pk => openProjects.add(pk)); btn.innerHTML = '<i class="ti ti-chevrons-up"></i> 全部とじる'; } 
+  else { openProjects.clear(); btn.innerHTML = '<i class="ti ti-chevrons-down"></i> 全部ひらく'; }
+  renderProjects();
+}
+function setView(v) {
+  view = v; document.getElementById('tab-all').className  = 'tab'+(v==='all' ?' active':''); document.getElementById('tab-mine').className = 'tab'+(v==='mine'?' active':''); renderProjects();
+}
+
+function openTaskModal(projKey, taskKey) {
+  editingTaskKey = taskKey || null; modalProjKey = projKey; const proj = projects[projKey]; const t = taskKey ? tasks[taskKey] : null;
+  document.getElementById('task-modal-title').textContent = t ? 'タスクの相談 🐿' : '新しいタスクをお出迎え 🐣';
+  document.getElementById('f-proj-display').value = proj ? proj.name : '';
+  document.getElementById('f-task').value = t?.task || ''; document.getElementById('f-status').value = t?.status || 'not_started';
+  document.getElementById('f-next').value = t?.nextAction || ''; document.getElementById('f-note').value = t?.note || ''; document.getElementById('f-owner').value = t?.owner || '';
+  if (t && t.owner && ownerAnimals[t.owner]) { selectAnimal(ownerAnimals[t.owner]); } else { selectAnimal('🐰'); }
+  openModal('task-modal-bg'); document.getElementById('f-task').focus();
+}
+
+async function saveTask() {
+  const task = document.getElementById('f-task').value.trim(); const status = document.getElementById('f-status').value;
+  const nextAction = document.getElementById('f-next').value.trim(); const note = document.getElementById('f-note').value.trim(); const owner = document.getElementById('f-owner').value.trim();
+  if (!task) { alert('なまえを教えてね'); return; }
+  
+  pushToUndoStack();
+  const data = { project:modalProjKey, task, status, nextAction, note, owner, updatedAt:Date.now() };
+  if(owner) { ownerAnimals[owner] = selectedAnimal; if(db) await db.ref('ownerAnimals/' + owner).set(selectedAnimal); }
+
+  if (!db) {
+    const k = editingTaskKey || 'demo_'+Date.now(); if (!editingTaskKey) data.createdAt = Date.now();
+    tasks[k] = {...tasks[k], ...data}; closeModal('task-modal-bg'); openProjects.add(modalProjKey); renderAll();
+    showToast(editingTaskKey ? '覚えました！✨' : '新しく仲間入り！🌱'); return;
+  }
+  if (editingTaskKey) { await db.ref('tasks/'+editingTaskKey).update(data); showToast('新しくなりました！✏️'); } 
+  else { data.createdAt = Date.now(); await db.ref('tasks').push(data); openProjects.add(modalProjKey); showToast('タスクが増えました！🌾'); }
+  closeModal('task-modal-bg');
+}
+
+async function deleteTask(key) {
+  if (!confirm('このタスクとお別れしますか？')) return;
+  pushToUndoStack();
+  if (!db) { delete tasks[key]; renderAll(); showToast('お別れしました 🍃 (Ctrl+Zで戻せるよ)'); return; }
+  await db.ref('tasks/'+key).remove(); showToast('お別れしました 🍃 (Ctrl+Zで戻せるよ)');
+}
+
+function openProjectModal(pk) {
+  editingProjKey = pk || null; const proj = pk ? projects[pk] : null;
+  document.getElementById('proj-modal-title').textContent = proj ? '名前をかえる 📂' : '新しい部屋をつくる ⛺';
+  document.getElementById('f-proj-name').value = proj?.name || '';
+  selectProjIcon(proj?.icon || '📂'); selectProjColor(proj?.color || 'default');
+  openModal('proj-modal-bg'); document.getElementById('f-proj-name').focus();
+}
+
+async function saveProject() {
+  const name = document.getElementById('f-proj-name').value.trim(); if (!name) { alert('お名前が必要です'); return; }
+  pushToUndoStack();
+  const data = { name: name, icon: selectedProjIcon, color: selectedProjColor };
+
+  if (!db) {
+    const k = editingProjKey || 'demo_p'+Date.now();
+    if (!editingProjKey) { data.createdAt = Date.now(); projects[k] = data; } 
+    else { projects[k] = { ...projects[k], ...data, updatedAt: Date.now() }; }
+    openProjects.add(k); closeModal('proj-modal-bg'); renderAll();
+    showToast(editingProjKey ? 'カスタマイズ完了！' : '部屋ができたよ！✨'); return;
+  }
+  if (editingProjKey) { data.updatedAt = Date.now(); await db.ref('projects/'+editingProjKey).update(data); showToast('変更を保存しました！🎨'); } 
+  else { data.createdAt = Date.now(); const ref = await db.ref('projects').push(data); openProjects.add(ref.key); showToast('部屋をつくりました！⛺'); }
+  closeModal('proj-modal-bg');
+}
+
+async function deleteProject(pk) {
+  const taskCount = Object.values(tasks).filter(t=>t.project===pk).length;
+  if (!confirm(taskCount ? `「${projects[pk]?.name}」と中の ${taskCount}個 のタスクを全部消しちゃう？` : `「${projects[pk]?.name}」を消しちゃう？`)) return;
+  pushToUndoStack();
+  if (!db) { delete projects[pk]; Object.keys(tasks).filter(k=>tasks[k].project===pk).forEach(k=>delete tasks[k]); openProjects.delete(pk); renderAll(); showToast('お部屋を片付けました 🧹 (Ctrl+Zで戻せるよ)'); return; }
+  const dels = {}; Object.keys(tasks).filter(k=>tasks[k].project===pk).forEach(k=>{ dels['tasks/'+k]=null; }); dels['projects/'+pk] = null;
+  await db.ref().update(dels); openProjects.delete(pk); showToast('お部屋を片付けました 🧹 (Ctrl+Zで戻せるよ)');
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function onBgClick(e, id) { if (e.target===document.getElementById(id)) closeModal(id); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
+
+async function syncToSpreadsheet() {
+  const btn = document.getElementById('sync-sheet-btn'); const originalText = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2" style="animation: spin 1s linear infinite;"></i> お届け中…';
+  if (!document.getElementById('spin-style')) { const style = document.createElement('style'); style.id = 'spin-style'; style.innerHTML = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }'; document.head.appendChild(style); }
+  try {
+    const exportData = [];
+    Object.entries(tasks).forEach(([tKey, t]) => {
+      const proj = projects[t.project];
+      exportData.push({
+        projectName: proj ? `${proj.icon || '📂'} ${proj.name}` : '不明な部屋',
+        task: t.task || '', status: STATUS[t.status]?.label || t.status, nextAction: t.nextAction || '', note: t.note || '', owner: t.owner ? `${ownerAnimals[t.owner] || ''} ${t.owner}` : '', updatedAt: t.updatedAt || t.createdAt || Date.now()
+      });
+    });
+    if (exportData.length === 0) { alert('届けるデータが空っぽです。'); btn.disabled = false; btn.innerHTML = originalText; return; }
+    const gasUrl = "https://script.google.com/macros/s/AKfycbxw9ZX_fXxAH69xjbFl7fVmqnFOu2l7eomkEm1WqG56BNTEJQ_l7zIxXJPSdu97gZUT/exec";
+    const response = await fetch(gasUrl, { method: 'POST', body: JSON.stringify(exportData) });
+    const result = await response.json();
+    if (result.status === 'success') { showToast('スプレッドシートに届きました！🕊️'); } else { throw new Error(result.message); }
+  } catch (error) { console.error(error); alert('お届けに失敗しちゃいました。'); } finally { btn.disabled = false; btn.innerHTML = originalText; }
+}
+initFirebase();
+</script>
+</body>
+</html>
