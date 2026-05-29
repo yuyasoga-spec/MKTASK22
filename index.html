@@ -624,19 +624,32 @@ function useDemoData() {
 }
 
 function renderAll() { renderSummary(); renderOwnerFilter(); if (view === 'calendar') renderCalendar(); else renderProjects(); }
+// ↑ ここまでが renderSummary()
+}
 
-function renderSummary() {
-  const arr = Object.values(tasks);
-  const c = {not_started:0,in_progress:0,waiting:0,done:0,blocked:0};
-  arr.forEach(t => { if(c[t.status]!==undefined) c[t.status]++; });
-  document.getElementById('summary').innerHTML = `
-    <div class="sc"><div class="sc-label">📂 プロジェクト</div><div class="sc-num">${Object.keys(projects).length}</div></div>
-    <div class="sc"><div class="sc-label">📝 ぜんぶのタスク</div><div class="sc-num">${arr.length}</div></div>
-    <div class="sc"><div class="sc-label">🌱 進行中</div><div class="sc-num" style="color:var(--blue-tx)">${c.in_progress}</div></div>
-    <div class="sc"><div class="sc-label">⏳ まちあわせ</div><div class="sc-num" style="color:var(--amber-tx)">${c.waiting}</div></div>
-    <div class="sc"><div class="sc-label">✨ できた！</div><div class="sc-num" style="color:var(--green-tx)">${c.done}</div></div>
-    <div class="sc"><div class="sc-label">🚧 おや？</div><div class="sc-num" style="color:var(--red-tx)">${c.blocked}</div></div>
-  `;
+// ↓ ここに追加
+function filterByStatus(status) {
+  const sel = document.getElementById('filter-status');
+  sel.value = status;
+  renderProjects();
+  if (status) {
+    const st = STATUS[status];
+    showToast(`${st.dot} ${st.label} のタスクだけ表示中`);
+  } else {
+    showToast('📂 全タスクを表示');
+  }
+}
+function filterByStatus(status) {
+  const sel = document.getElementById('filter-status');
+  sel.value = status;
+  renderProjects();
+  // フィルタが変わったことをトースト通知
+  if (status) {
+    const st = STATUS[status];
+    showToast(`${st.dot} ${st.label} のタスクだけ表示中`);
+  } else {
+    showToast('📂 全タスクを表示');
+  }
 }
 
 function renderOwnerFilter() {
