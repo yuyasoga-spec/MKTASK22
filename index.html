@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>株式会社livマーケタスク管理</title>
+<title>わくわく動物の森 マーケ案件管理 🐾</title>
 
 <script>
   var FIREBASE_CONFIG = {
@@ -247,35 +247,6 @@ tr:hover .row-actions { opacity: 1; }
 
 .toast { position: fixed; bottom: 2.5rem; left: 50%; transform: translateX(-50%); background: #423830; color: #fff; padding: 12px 28px; border-radius: 30px; font-size: 13px; font-weight: 700; z-index: 300; opacity: 0; transition: opacity .25s, bottom 0.25s; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,0.15); text-align: center; }
 .toast.show { opacity: 1; bottom: 3rem; }
-
-/* ── 📅 カレンダービュー ── */
-.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
-.cal-nav { display: flex; align-items: center; gap: 12px; }
-.cal-title { font-size: 18px; font-weight: 700; }
-.cal-nav-btn { background: var(--surface); border: 2px solid var(--border2); border-radius: var(--radius); width: 36px; height: 36px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: all .15s; }
-.cal-nav-btn:hover { background: var(--surface2); color: var(--text); }
-.cal-today-btn { background: var(--surface); border: 2px solid var(--border2); border-radius: var(--radius); padding: 0 14px; height: 36px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text2); transition: all .15s; }
-.cal-today-btn:hover { background: var(--surface2); color: var(--text); }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--text2); padding: 8px 0; }
-.cal-dow:first-child { color: var(--red-tx); }
-.cal-dow:last-child  { color: var(--blue-tx); }
-.cal-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; min-height: 90px; padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: all .15s; }
-.cal-cell:hover { border-color: var(--border2); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
-.cal-cell.other-month { background: var(--surface3); opacity: 0.5; }
-.cal-cell.today { border-color: var(--blue); border-width: 2px; }
-.cal-day-num { font-size: 12px; font-weight: 700; color: var(--text2); line-height: 1; }
-.cal-cell.today .cal-day-num { background: var(--blue); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-.cal-cell:first-child .cal-day-num, .cal-dow:first-child ~ .cal-cell:nth-child(7n+1) .cal-day-num { color: var(--red-tx); }
-.cal-task-chip { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: opacity .1s; line-height: 1.4; }
-.cal-task-chip:hover { opacity: 0.75; }
-.cal-more { font-size: 10px; color: var(--text3); font-weight: 700; padding: 1px 4px; }
-.cal-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.25rem; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
-.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); font-weight: 700; }
-.cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-.due-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--amber-bg); color: var(--amber-tx); }
-.due-badge.overdue { background: var(--red-bg); color: var(--red-tx); }
-.due-badge.today-due { background: var(--blue-bg); color: var(--blue-tx); }
 </style>
 </head>
 <body>
@@ -309,13 +280,12 @@ tr:hover .row-actions { opacity: 1; }
   <div class="header-left">
     <div class="logo">
       <span>🐾</span>
-      株式会社livマーkrティング部タスク管理シート
+      わくわく動物の森 管理シート
       <button class="btn-festival" onclick="startAnimalParade()">🏮 お祭りモード</button>
     </div>
     <div class="tabs">
-      <button class="tab active" id="tab-all"      onclick="setView('all')">みんなのシート</button>
-      <button class="tab"        id="tab-mine"     onclick="setView('mine')">じぶんのシート</button>
-      <button class="tab"        id="tab-calendar" onclick="setView('calendar')">📅 カレンダー</button>
+      <button class="tab active" id="tab-all"  onclick="setView('all')">みんなのシート</button>
+      <button class="tab"        id="tab-mine" onclick="setView('mine')">じぶんのシート</button>
     </div>
   </div>
   <div class="sync">
@@ -359,7 +329,6 @@ tr:hover .row-actions { opacity: 1; }
   </div>
 
   <div class="proj-list" id="proj-list"></div>
-  <div id="calendar-view" style="display:none"></div>
 </main>
 
 <div class="modal-bg" id="task-modal-bg" onclick="onBgClick(event,'task-modal-bg')">
@@ -380,7 +349,6 @@ tr:hover .row-actions { opacity: 1; }
       </select>
     </div>
     <div class="field"><label>つぎにやること</label><textarea id="f-next" placeholder="次の一歩をかこう"></textarea></div>
-    <div class="field"><label>📅 期日（しめきり）</label><input type="date" id="f-due"></div>
     <div class="field"><label>メモ・まめちしき</label><textarea id="f-note" placeholder="補足や残しておきたいこと"></textarea></div>
     <div class="field">
       <label>だれがやる？（担当者）</label>
@@ -623,33 +591,20 @@ function useDemoData() {
   ownerAnimals = { '田中': '🐰', '佐藤': '🐱' }; openProjects = new Set(['p1','p2']); renderAll();
 }
 
-function renderAll() { renderSummary(); renderOwnerFilter(); if (view === 'calendar') renderCalendar(); else renderProjects(); }
-// ↑ ここまでが renderSummary()
-}
+function renderAll() { renderSummary(); renderOwnerFilter(); renderProjects(); }
 
-// ↓ ここに追加
-function filterByStatus(status) {
-  const sel = document.getElementById('filter-status');
-  sel.value = status;
-  renderProjects();
-  if (status) {
-    const st = STATUS[status];
-    showToast(`${st.dot} ${st.label} のタスクだけ表示中`);
-  } else {
-    showToast('📂 全タスクを表示');
-  }
-}
-function filterByStatus(status) {
-  const sel = document.getElementById('filter-status');
-  sel.value = status;
-  renderProjects();
-  // フィルタが変わったことをトースト通知
-  if (status) {
-    const st = STATUS[status];
-    showToast(`${st.dot} ${st.label} のタスクだけ表示中`);
-  } else {
-    showToast('📂 全タスクを表示');
-  }
+function renderSummary() {
+  const arr = Object.values(tasks);
+  const c = {not_started:0,in_progress:0,waiting:0,done:0,blocked:0};
+  arr.forEach(t => { if(c[t.status]!==undefined) c[t.status]++; });
+  document.getElementById('summary').innerHTML = `
+    <div class="sc"><div class="sc-label">📂 プロジェクト</div><div class="sc-num">${Object.keys(projects).length}</div></div>
+    <div class="sc"><div class="sc-label">📝 ぜんぶのタスク</div><div class="sc-num">${arr.length}</div></div>
+    <div class="sc"><div class="sc-label">🌱 進行中</div><div class="sc-num" style="color:var(--blue-tx)">${c.in_progress}</div></div>
+    <div class="sc"><div class="sc-label">⏳ まちあわせ</div><div class="sc-num" style="color:var(--amber-tx)">${c.waiting}</div></div>
+    <div class="sc"><div class="sc-label">✨ できた！</div><div class="sc-num" style="color:var(--green-tx)">${c.done}</div></div>
+    <div class="sc"><div class="sc-label">🚧 おや？</div><div class="sc-num" style="color:var(--red-tx)">${c.blocked}</div></div>
+  `;
 }
 
 function renderOwnerFilter() {
@@ -723,7 +678,6 @@ function renderProjects() {
             <th class="col-status">じょうたい</th>
             <th class="col-next">つぎにやること</th>
             <th class="col-note">メモ</th>
-            <th style="width:9%">期日</th>
             <th class="col-owner">だれがやる？</th>
             <th class="col-actions"></th>
           </tr></thead>
@@ -731,18 +685,11 @@ function renderProjects() {
             ${ptasks.map(t => {
               const st = STATUS[t.status]||STATUS.not_started;
               const isDoneClass = t.status === 'done' ? 'task-done-row' : '';
-              const todayStr2 = toDateStr(new Date());
-              const dueBadge = t.due ? (() => {
-                const isOver = t.due < todayStr2 && t.status !== 'done';
-                const isTdy  = t.due === todayStr2;
-                return `<span class="due-badge ${isOver?'overdue':isTdy?'today-due':''}">${isOver?'⚠':isTdy?'📌':'📅'} ${t.due}</span>`;
-              })() : '—';
               return `<tr class="${isDoneClass}">
                 <td class="task-name" title="${esc(t.task)}">📌 ${esc(t.task)}</td>
                 <td><span class="badge ${st.cls}">${st.dot} ${st.label}</span></td>
                 <td class="multiline">${esc(t.nextAction||'—')}</td>
                 <td class="multiline note-text">${esc(t.note||'—')}</td>
-                <td style="white-space:nowrap">${dueBadge}</td>
                 <td>${t.owner ? `<span class="owner-chip"><span>${ownerAnimals[t.owner] || '🐾'}</span> ${esc(t.owner)}</span>` : '—'}</td>
                 <td><div class="row-actions">
                   <button class="icon-btn" onclick="openTaskModal('${pk}','${t.key}')" title="なおす"><i class="ti ti-edit"></i></button>
@@ -815,15 +762,7 @@ function toggleAllProjects() {
   renderProjects();
 }
 function setView(v) {
-  view = v;
-  document.getElementById('tab-all').className      = 'tab'+(v==='all'      ?' active':'');
-  document.getElementById('tab-mine').className     = 'tab'+(v==='mine'     ?' active':'');
-  document.getElementById('tab-calendar').className = 'tab'+(v==='calendar' ?' active':'');
-  const isCalendar = v === 'calendar';
-  document.getElementById('proj-list').style.display    = isCalendar ? 'none' : '';
-  document.getElementById('calendar-view').style.display = isCalendar ? '' : 'none';
-  // ツールバーのフィルタ等は隠さなくてよいが、カレンダー時は不要なものを調整
-  if (isCalendar) renderCalendar(); else renderProjects();
+  view = v; document.getElementById('tab-all').className  = 'tab'+(v==='all' ?' active':''); document.getElementById('tab-mine').className = 'tab'+(v==='mine'?' active':''); renderProjects();
 }
 
 function openTaskModal(projKey, taskKey) {
@@ -831,19 +770,18 @@ function openTaskModal(projKey, taskKey) {
   document.getElementById('task-modal-title').textContent = t ? 'タスクの相談 🐿' : '新しいタスクをお出迎え 🐣';
   document.getElementById('f-proj-display').value = proj ? proj.name : '';
   document.getElementById('f-task').value = t?.task || ''; document.getElementById('f-status').value = t?.status || 'not_started';
-  document.getElementById('f-next').value = t?.nextAction || ''; document.getElementById('f-due').value = t?.due || ''; document.getElementById('f-note').value = t?.note || ''; document.getElementById('f-owner').value = t?.owner || '';
+  document.getElementById('f-next').value = t?.nextAction || ''; document.getElementById('f-note').value = t?.note || ''; document.getElementById('f-owner').value = t?.owner || '';
   if (t && t.owner && ownerAnimals[t.owner]) { selectAnimal(ownerAnimals[t.owner]); } else { selectAnimal('🐰'); }
   openModal('task-modal-bg'); document.getElementById('f-task').focus();
 }
 
 async function saveTask() {
   const task = document.getElementById('f-task').value.trim(); const status = document.getElementById('f-status').value;
-  const nextAction = document.getElementById('f-next').value.trim(); const note = document.getElementById('f-note').value.trim(); const owner = document.getElementById('f-owner').value.trim(); const due = document.getElementById('f-due').value || null;
+  const nextAction = document.getElementById('f-next').value.trim(); const note = document.getElementById('f-note').value.trim(); const owner = document.getElementById('f-owner').value.trim();
   if (!task) { alert('なまえを教えてね'); return; }
   
   pushToUndoStack();
   const data = { project:modalProjKey, task, status, nextAction, note, owner, updatedAt:Date.now() };
-  if (due) data.due = due; // 期日がある場合のみフィールドを追加（既存データに余計なフィールドを生やさない）
   if(owner) { ownerAnimals[owner] = selectedAnimal; if(db) await db.ref('ownerAnimals/' + owner).set(selectedAnimal); }
 
   if (!db) {
@@ -851,11 +789,7 @@ async function saveTask() {
     tasks[k] = {...tasks[k], ...data}; closeModal('task-modal-bg'); openProjects.add(modalProjKey); renderAll();
     showToast(editingTaskKey ? '覚えました！✨' : '新しく仲間入り！🌱'); return;
   }
-  if (editingTaskKey) {
-    // 期日を消した場合はFirebaseからも削除
-    if (!due) data.due = null;
-    await db.ref('tasks/'+editingTaskKey).update(data); showToast('新しくなりました！✏️');
-  } 
+  if (editingTaskKey) { await db.ref('tasks/'+editingTaskKey).update(data); showToast('新しくなりました！✏️'); } 
   else { data.createdAt = Date.now(); await db.ref('tasks').push(data); openProjects.add(modalProjKey); showToast('タスクが増えました！🌾'); }
   closeModal('task-modal-bg');
 }
@@ -927,144 +861,6 @@ async function syncToSpreadsheet() {
     if (result.status === 'success') { showToast('スプレッドシートに届きました！🕊️'); } else { throw new Error(result.message); }
   } catch (error) { console.error(error); alert('お届けに失敗しちゃいました。'); } finally { btn.disabled = false; btn.innerHTML = originalText; }
 }
-// ── 📅 カレンダー機能 ──
-let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth(); // 0-indexed
-
-function renderCalendar() {
-  const today = new Date();
-  const todayStr = toDateStr(today);
-  const firstDay = new Date(calYear, calMonth, 1);
-  const lastDay  = new Date(calYear, calMonth + 1, 0);
-  const startDow = firstDay.getDay(); // 0=Sun
-  const daysInMonth = lastDay.getDate();
-
-  // 期日のあるタスクをdateStr→tasks[]のマップに
-  const tasksByDate = {};
-  Object.entries(tasks).forEach(([k, t]) => {
-    if (!t.due) return;
-    if (!tasksByDate[t.due]) tasksByDate[t.due] = [];
-    tasksByDate[t.due].push({ key: k, ...t });
-  });
-
-  // ステータス色マップ
-  const STATUS_COLORS = {
-    not_started: ['var(--gray-bg)',  'var(--gray-tx)'],
-    in_progress:  ['var(--blue-bg)', 'var(--blue-tx)'],
-    waiting:      ['var(--amber-bg)','var(--amber-tx)'],
-    done:         ['var(--green-bg)','var(--green-tx)'],
-    blocked:      ['var(--red-bg)',  'var(--red-tx)'],
-  };
-
-  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const dowLabels  = ['日','月','火','水','木','金','土'];
-
-  // セルを生成（前月埋め → 当月 → 翌月埋め）
-  let cells = '';
-  // 前月の空セル
-  const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
-  for (let i = 0; i < startDow; i++) {
-    const d = prevMonthDays - startDow + 1 + i;
-    cells += `<div class="cal-cell other-month"><div class="cal-day-num">${d}</div></div>`;
-  }
-  // 当月セル
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = dateStr === todayStr;
-    const dow = new Date(calYear, calMonth, d).getDay();
-    const dayTasks = tasksByDate[dateStr] || [];
-    const maxShow = 3;
-    const chipsHtml = dayTasks.slice(0, maxShow).map(t => {
-      const [bg, tx] = STATUS_COLORS[t.status] || STATUS_COLORS.not_started;
-      const proj = projects[t.project];
-      const icon = proj?.icon || '📌';
-      return `<div class="cal-task-chip" style="background:${bg};color:${tx}" onclick="openTaskModal('${t.project}','${t.key}')" title="${esc(t.task)}">${icon} ${esc(t.task)}</div>`;
-    }).join('');
-    const moreHtml = dayTasks.length > maxShow ? `<div class="cal-more">+${dayTasks.length - maxShow}件</div>` : '';
-    const numStyle = dow === 0 ? 'color:var(--red-tx)' : dow === 6 ? 'color:var(--blue-tx)' : '';
-    cells += `<div class="cal-cell${isToday?' today':''}">
-      <div class="cal-day-num" style="${numStyle}">${isToday ? d : d}</div>
-      ${chipsHtml}${moreHtml}
-    </div>`;
-  }
-  // 翌月の空セル（6行になるよう）
-  const total = startDow + daysInMonth;
-  const trailing = total % 7 === 0 ? 0 : 7 - (total % 7);
-  for (let i = 1; i <= trailing; i++) {
-    cells += `<div class="cal-cell other-month"><div class="cal-day-num">${i}</div></div>`;
-  }
-
-  // 期日あり・期限切れタスク一覧（今月の全期日タスク）
-  const thisMonthTasks = Object.entries(tasks)
-    .filter(([,t]) => t.due && t.due.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`))
-    .sort(([,a],[,b]) => a.due.localeCompare(b.due));
-
-  const listHtml = thisMonthTasks.length ? thisMonthTasks.map(([k,t]) => {
-    const st = STATUS[t.status] || STATUS.not_started;
-    const proj = projects[t.project];
-    const isOverdue = t.due < todayStr && t.status !== 'done';
-    const isToday2  = t.due === todayStr;
-    const dueCls = isOverdue ? 'overdue' : isToday2 ? 'today-due' : '';
-    const dueLabel = isOverdue ? '⚠ 期限切れ' : isToday2 ? '📌 今日！' : `📅 ${t.due}`;
-    return `<tr class="${t.status==='done'?'task-done-row':''}">
-      <td class="task-name">📌 ${esc(t.task)}</td>
-      <td><span class="badge ${st.cls}">${st.dot} ${st.label}</span></td>
-      <td><span class="due-badge ${dueCls}">${dueLabel}</span></td>
-      <td>${proj ? `${proj.icon||'📂'} ${esc(proj.name)}` : '—'}</td>
-      <td>${t.owner ? `<span class="owner-chip">${ownerAnimals[t.owner]||'🐾'} ${esc(t.owner)}</span>` : '—'}</td>
-      <td><button class="icon-btn" onclick="openTaskModal('${t.project}','${k}')"><i class="ti ti-edit"></i></button></td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="6" style="padding:1.5rem;text-align:center;color:var(--text3)">今月は期日のあるタスクがありません 🌿</td></tr>`;
-
-  document.getElementById('calendar-view').innerHTML = `
-    <div class="cal-header">
-      <div class="cal-nav">
-        <button class="cal-nav-btn" onclick="calMove(-1)"><i class="ti ti-chevron-left"></i></button>
-        <div class="cal-title">${calYear}年 ${monthNames[calMonth]}</div>
-        <button class="cal-nav-btn" onclick="calMove(1)"><i class="ti ti-chevron-right"></i></button>
-        <button class="cal-today-btn" onclick="calToday()">今月</button>
-      </div>
-      <div style="font-size:12px;color:var(--text3)">期日のあるタスクが表示されます</div>
-    </div>
-    <div class="cal-grid">
-      ${dowLabels.map(d=>`<div class="cal-dow">${d}</div>`).join('')}
-      ${cells}
-    </div>
-    ${thisMonthTasks.length ? `
-    <div style="margin-top:1.5rem">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text2)">📋 今月の期日タスク一覧</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
-        <table>
-          <thead><tr>
-            <th class="col-task">タスク名</th>
-            <th class="col-status">じょうたい</th>
-            <th style="width:18%">期日</th>
-            <th style="width:18%">プロジェクト</th>
-            <th class="col-owner">担当者</th>
-            <th class="col-actions"></th>
-          </tr></thead>
-          <tbody>${listHtml}</tbody>
-        </table>
-      </div>
-    </div>` : ''}
-  `;
-}
-
-function toDateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function calMove(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth <  0) { calMonth = 11; calYear--; }
-  renderCalendar();
-}
-function calToday() {
-  calYear  = new Date().getFullYear();
-  calMonth = new Date().getMonth();
-  renderCalendar();
-}
-
 initFirebase();
 </script>
 </body>
